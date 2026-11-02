@@ -292,7 +292,9 @@ class MainActivity : Activity() {
         chList.nextFocusLeftId = groupList.id
 
         leftAd = RowAdapter({ groupNames.size }) { t, p ->
-            t.text = groupNames[p]
+            val l = groupChs[p]
+            // Đài 1 kênh: hiện số kênh. Đài nhiều kênh: hiện dải số (vd 5–13)
+            t.text = if (l.size == 1) "${l[0].num}   ${groupNames[p]}" else "${l.first().num}–${l.last().num}   ${groupNames[p]}"
             t.setTextColor(if (p == leftSel) GOLD else Color.WHITE)
             t.typeface = if (p == leftSel) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
         }
@@ -518,10 +520,12 @@ class MainActivity : Activity() {
     private fun setGroup(gi: Int) {
         if (groupNames.isEmpty()) return
         leftSel = gi.coerceIn(0, groupNames.size - 1)
-        shownList = listFor(leftSel)
+        val l = listFor(leftSel)
+        // Đài chỉ có 1 kênh: bản thân đài là kênh, cột bên phải để trống
+        shownList = if (l.size == 1) emptyList() else l
         leftAd.notifyDataSetChanged()
         rightAd.notifyDataSetChanged()
-        rightTitle.text = groupNames[leftSel]
+        rightTitle.text = if (l.size == 1) "" else groupNames[leftSel]
         chList.setSelection(0)
     }
 
@@ -542,7 +546,7 @@ class MainActivity : Activity() {
         if (c != null) silence()
         groupList.setSelection(leftSel)
         chList.setSelection(if (c != null) shownList.indexOf(c).coerceAtLeast(0) else 0)
-        if (focusGroups) groupList.requestFocus() else chList.requestFocus()
+        if (focusGroups || shownList.isEmpty()) groupList.requestFocus() else chList.requestFocus()
     }
 
     /** Về bảng chọn kênh là tắt tiếng ngay. */
@@ -619,7 +623,10 @@ class MainActivity : Activity() {
                 return true
             }
             if (down && groupList.hasFocus()) {
-                if (k == KeyEvent.KEYCODE_DPAD_RIGHT) syncGroup()      // sang cột Kênh: chắc chắn đúng đài
+                if (k == KeyEvent.KEYCODE_DPAD_RIGHT) {                // sang cột Kênh: chắc chắn đúng đài
+                    syncGroup()
+                    if (shownList.isEmpty()) return true               // đài 1 kênh: không có gì ở bên phải
+                }
                 val r = super.dispatchKeyEvent(e)
                 if (k == KeyEvent.KEYCODE_DPAD_UP || k == KeyEvent.KEYCODE_DPAD_DOWN ||
                     k == KeyEvent.KEYCODE_PAGE_UP || k == KeyEvent.KEYCODE_PAGE_DOWN) ui.post { syncGroup() }
