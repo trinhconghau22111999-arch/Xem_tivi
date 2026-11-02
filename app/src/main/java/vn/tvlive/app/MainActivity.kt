@@ -145,7 +145,7 @@ class MainActivity : Activity() {
         val last = getSharedPreferences("tv", MODE_PRIVATE).getString("last", null)
         val start = all.firstOrNull { it.url == last }
         if (start != null) ui.postDelayed({ if (!isFinishing) play(start) }, 300)
-        else showOverlay(true)
+        else { showOverlay(true); showWelcome() }
     }
 
     override fun onStart() {
@@ -531,6 +531,13 @@ class MainActivity : Activity() {
         rightAd.notifyDataSetChanged()
         rightTitle.text = if (l.size == 1) "" else groupNames[leftSel]
         chList.setSelection(0)
+    }
+
+    /** Lần đầu mở app (chưa xem kênh nào): bảng bên phải hiện "Tivi của Bắp". */
+    private fun showWelcome() {
+        shownList = emptyList()
+        rightAd.notifyDataSetChanged()
+        rightTitle.text = "Tivi của Bắp"
     }
 
     /** Đồng bộ cột Kênh với đài đang được tô sáng ở cột Đài (không chỉ dựa vào onItemSelected). */
