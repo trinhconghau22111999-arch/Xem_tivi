@@ -8,13 +8,12 @@ App chỉ để xem kênh truyền hình (nguồn vtvgo.vn, danh sách ở `app/
 | ▲ / CH+ | kênh kế tiếp | di chuyển |
 | ▼ / CH- | kênh trước | di chuyển |
 | ◀ / ▶ (hoặc PG-/PG+) | nhảy sang đài trước / sau | ◀ về cột Đài, ▶ sang cột Kênh |
-| OK / Menu / Guide | mở bảng chọn kênh | OK = xem kênh; giữ OK = thêm/bỏ ★ yêu thích |
+| OK / Menu / Guide | mở bảng chọn kênh | OK = xem kênh (đài chỉ có 1 kênh: OK trên đài là xem luôn); giữ OK = thêm/bỏ ★ |
 | Số 0-9 | gõ số kênh (vd 12) rồi chờ ~2 giây | |
 | Đỏ | thêm/bỏ ★ kênh đang xem | thêm/bỏ ★ kênh đang chọn |
-| Xanh lá | mở danh sách ★ Yêu thích | |
 | Vàng | tải lại kênh | |
 | Info | hiện tên kênh + đài | |
-| Back | bấm 2 lần để thoát | đóng bảng |
+| Back | mở thẳng cột Đài; bấm Back 2 lần nhanh để thoát | đóng bảng (2 lần nhanh: thoát) |
 
 Mở app là tự vào kênh xem lần trước. Bấm nhanh ▲/▼ nhiều lần chỉ tải kênh cuối cùng (đỡ giật). Video đứng hình ~40 giây hoặc lỗi mạng thì tự tải lại.
 

@@ -99,7 +99,7 @@ class MainActivity : Activity() {
     private var cur: Ch? = null                       // kênh đang xem
     private var pending: Ch? = null                   // kênh đang "lướt" tới, chưa tải
     private var shownList: List<Ch> = emptyList()     // danh sách kênh đang hiện bên phải
-    private var leftSel = 1                           // 0 = Yêu thích, i>0 = groupNames[i-1]
+    private var leftSel = 0                           // chỉ số đài đang chọn trong groupNames
 
     // ---- giao diện ----
     private lateinit var root: FrameLayout
@@ -137,7 +137,7 @@ class MainActivity : Activity() {
         val last = getSharedPreferences("tv", MODE_PRIVATE).getString("last", null)
         val start = all.firstOrNull { it.url == last }
         if (start != null) ui.postDelayed({ if (!isFinishing) play(start) }, 300)
-        else showOverlay(null)
+        else showOverlay(true)
     }
 
     override fun onStart() {
@@ -209,7 +209,7 @@ class MainActivity : Activity() {
         getSharedPreferences("tv", MODE_PRIVATE).edit().putStringSet("favs", HashSet(favs)).apply()
     }
 
-    private fun listFor(gi: Int): List<Ch> = if (gi == 0) all.filter { it.url in favs } else groupChs[gi - 1]
+    private fun listFor(gi: Int): List<Ch> = groupChs[gi]
 
     // ---------------------------------------------------------------- giao diện
 
@@ -279,8 +279,8 @@ class MainActivity : Activity() {
         groupList.nextFocusRightId = chList.id
         chList.nextFocusLeftId = groupList.id
 
-        leftAd = RowAdapter({ groupNames.size + 1 }) { t, p ->
-            t.text = if (p == 0) "★  Yêu thích (${favs.size})" else groupNames[p - 1]
+        leftAd = RowAdapter({ groupNames.size }) { t, p ->
+            t.text = (if (groupChs[p].any { it.url in favs }) "★ " else "") + groupNames[p]
             t.setTextColor(if (p == leftSel) GOLD else Color.WHITE)
             t.typeface = if (p == leftSel) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
         }
@@ -299,7 +299,11 @@ class MainActivity : Activity() {
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        groupList.setOnItemClickListener { _, _, _, _ -> chList.requestFocus() }
+        // Đài chỉ có 1 kênh: bấm OK là xem luôn, không phải vào thêm một trang nữa
+        groupList.setOnItemClickListener { _, _, pos, _ ->
+            val l = groupChs.getOrNull(pos) ?: return@setOnItemClickListener
+            if (l.size == 1) play(l[0]) else chList.requestFocus()
+        }
         chList.setOnItemClickListener { _, _, pos, _ -> shownList.getOrNull(pos)?.let { play(it) } }
 
         val left = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -307,7 +311,7 @@ class MainActivity : Activity() {
         left.addView(groupList, LinearLayout.LayoutParams(-1, 0, 1f))
         rightTitle = title("")
         val hint = TextView(this).apply {
-            text = "OK: xem kênh     Giữ OK / nút Đỏ: thêm-bỏ ★ yêu thích     Back: đóng"
+            text = "Giữ OK / nút Đỏ: ★ yêu thích   •   Back: đóng"
             textSize = 16f; setTextColor(0xFFAAAAAA.toInt()); setPadding(dp(16), dp(10), 0, 0)
         }
         val right = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(28), 0, 0, 0) }
@@ -319,7 +323,7 @@ class MainActivity : Activity() {
         root.addView(overlay, FrameLayout.LayoutParams(-1, -1))
 
         setContentView(root)
-        setGroup(if (groupNames.isEmpty()) 0 else 1)
+        setGroup(0)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -470,25 +474,24 @@ class MainActivity : Activity() {
     private fun overlayOn() = overlay.visibility == View.VISIBLE
 
     private fun setGroup(gi: Int) {
-        leftSel = gi.coerceIn(0, groupNames.size)
+        if (groupNames.isEmpty()) return
+        leftSel = gi.coerceIn(0, groupNames.size - 1)
         shownList = listFor(leftSel)
         leftAd.notifyDataSetChanged()
         rightAd.notifyDataSetChanged()
-        rightTitle.text = if (leftSel == 0) "★ Yêu thích" + (if (shownList.isEmpty()) " — chưa có kênh, giữ OK trên một kênh để thêm" else "")
-        else groupNames[leftSel - 1]
+        rightTitle.text = groupNames[leftSel]
     }
 
-    /** Mở bảng chọn; mặc định nhảy tới đúng đài + kênh đang xem. startGroup != null thì mở đài đó. */
-    private fun showOverlay(startGroup: Int?) {
+    /** Mở bảng chọn. focusGroups = true: con trỏ ở cột Đài; mặc định nhảy tới đúng kênh đang xem. */
+    private fun showOverlay(focusGroups: Boolean) {
         ui.removeCallbacks(zapRun); pending = null
         val c = cur
-        val gi = startGroup ?: (if (c == null) 1 else groupNames.indexOf(c.group) + 1).coerceAtLeast(if (groupNames.isEmpty()) 0 else 1)
+        val gi = if (c == null) 0 else groupNames.indexOf(c.group).coerceAtLeast(0)
         setGroup(gi)
         overlay.visibility = View.VISIBLE
         groupList.setSelection(leftSel)
-        val idx = if (c != null) shownList.indexOf(c).coerceAtLeast(0) else 0
-        chList.setSelection(idx)
-        chList.requestFocus()
+        chList.setSelection(if (c != null) shownList.indexOf(c).coerceAtLeast(0) else 0)
+        if (focusGroups) groupList.requestFocus() else chList.requestFocus()
     }
 
     private fun hideOverlay() {
@@ -593,7 +596,7 @@ class MainActivity : Activity() {
             KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_PAGE_DOWN,
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER,
             KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_GUIDE, KeyEvent.KEYCODE_TV,
-            KeyEvent.KEYCODE_PROG_RED, KeyEvent.KEYCODE_PROG_GREEN, KeyEvent.KEYCODE_PROG_YELLOW, KeyEvent.KEYCODE_PROG_BLUE -> true
+            KeyEvent.KEYCODE_PROG_RED, KeyEvent.KEYCODE_PROG_YELLOW, KeyEvent.KEYCODE_PROG_BLUE -> true
             else -> false
         }
         if (!mapped) return super.dispatchKeyEvent(e)     // phím âm lượng, v.v. để hệ thống xử lý
@@ -605,26 +608,26 @@ class MainActivity : Activity() {
             KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_PAGE_UP -> zapGroup(+1)
             KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_PAGE_DOWN -> zapGroup(-1)
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER,
-            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_GUIDE, KeyEvent.KEYCODE_TV -> if (e.repeatCount == 0) showOverlay(null)
+            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_GUIDE, KeyEvent.KEYCODE_TV -> if (e.repeatCount == 0) showOverlay(false)
             KeyEvent.KEYCODE_INFO -> cur?.let { showOsd(it.label() + "   •   " + it.group) }
             KeyEvent.KEYCODE_PROG_RED -> if (e.repeatCount == 0) (pending ?: cur)?.let { toggleFav(it) }
-            KeyEvent.KEYCODE_PROG_GREEN -> if (e.repeatCount == 0) showOverlay(0)
             KeyEvent.KEYCODE_PROG_YELLOW -> if (e.repeatCount == 0) { showMsg("Tải lại kênh…", 3000); reloadCur() }
-            KeyEvent.KEYCODE_PROG_BLUE -> if (e.repeatCount == 0) showOverlay(null)
+            KeyEvent.KEYCODE_PROG_BLUE -> if (e.repeatCount == 0) showOverlay(false)
         }
         return true
     }
 
+    // Back: đang xem -> mở thẳng cột Đài (không lùi từng trang). Bấm Back 2 lần nhanh (dưới 1,5 giây) -> thoát app.
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        val now = System.currentTimeMillis()
+        val quick = now - lastBack < 1500
+        lastBack = now
         when {
             fullView != null -> hideFull()
-            overlayOn() -> if (cur != null) hideOverlay() else finish()
-            else -> {
-                val now = System.currentTimeMillis()
-                if (now - lastBack < 2000) finish()
-                else { lastBack = now; Toast.makeText(this, "Nhấn Back lần nữa để thoát", Toast.LENGTH_SHORT).show() }
-            }
+            overlayOn() -> if (cur == null || quick) finish() else hideOverlay()
+            quick -> finish()
+            else -> showOverlay(true)
         }
     }
 }
