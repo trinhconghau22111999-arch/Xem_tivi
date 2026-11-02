@@ -297,7 +297,13 @@ class MainActivity : Activity() {
         // Đài chỉ có 1 kênh: bấm OK là xem luôn, không phải vào thêm một trang nữa
         groupList.setOnItemClickListener { _, _, pos, _ ->
             val l = groupChs.getOrNull(pos) ?: return@setOnItemClickListener
-            if (l.size == 1) play(l[0]) else chList.requestFocus()
+            if (l.size == 1) {
+                play(l[0])
+            } else {
+                setGroup(pos)               // luôn hiện đúng các kênh của đài vừa bấm
+                chList.setSelection(0)
+                chList.requestFocus()
+            }
         }
         chList.setOnItemClickListener { _, _, pos, _ -> shownList.getOrNull(pos)?.let { play(it) } }
 
@@ -472,6 +478,13 @@ class MainActivity : Activity() {
         leftAd.notifyDataSetChanged()
         rightAd.notifyDataSetChanged()
         rightTitle.text = groupNames[leftSel]
+        chList.setSelection(0)
+    }
+
+    /** Đồng bộ cột Kênh với đài đang được tô sáng ở cột Đài (không chỉ dựa vào onItemSelected). */
+    private fun syncGroup() {
+        val p = groupList.selectedItemPosition
+        if (p >= 0 && p != leftSel) setGroup(p)
     }
 
     /** Mở bảng chọn. focusGroups = true: con trỏ ở cột Đài; mặc định nhảy tới đúng kênh đang xem. */
@@ -559,6 +572,13 @@ class MainActivity : Activity() {
             if (k == KeyEvent.KEYCODE_MENU || k == KeyEvent.KEYCODE_INFO || k == KeyEvent.KEYCODE_GUIDE) {
                 if (down && cur != null) hideOverlay()
                 return true
+            }
+            if (down && groupList.hasFocus()) {
+                if (k == KeyEvent.KEYCODE_DPAD_RIGHT) syncGroup()      // sang cột Kênh: chắc chắn đúng đài
+                val r = super.dispatchKeyEvent(e)
+                if (k == KeyEvent.KEYCODE_DPAD_UP || k == KeyEvent.KEYCODE_DPAD_DOWN ||
+                    k == KeyEvent.KEYCODE_PAGE_UP || k == KeyEvent.KEYCODE_PAGE_DOWN) ui.post { syncGroup() }
+                return r
             }
             return super.dispatchKeyEvent(e)
         }
