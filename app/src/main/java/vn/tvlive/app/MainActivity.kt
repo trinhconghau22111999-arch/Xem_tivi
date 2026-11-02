@@ -114,6 +114,10 @@ class MainActivity : Activity() {
     private lateinit var osd: TextView
     private lateinit var osdTime: TextView
     private lateinit var msg: TextView
+    private lateinit var cover: FrameLayout
+    private lateinit var coverNum: TextView
+    private lateinit var coverName: TextView
+    private var countdown = 0
     private lateinit var overlay: LinearLayout
     private lateinit var groupList: ListView
     private lateinit var chList: ListView
@@ -262,6 +266,19 @@ class MainActivity : Activity() {
         root.addView(osdTime, FrameLayout.LayoutParams(-2, -2).apply { gravity = Gravity.TOP or Gravity.END; setMargins(0, dp(24), dp(32), 0) })
         msg = pill(22f)
         root.addView(msg, FrameLayout.LayoutParams(-2, -2).apply { gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL; setMargins(0, 0, 0, dp(40)) })
+
+        // ---- màn che lúc đang tải kênh: đếm ngược 5..1 rồi tự biến mất ----
+        cover = FrameLayout(this).apply { setBackgroundColor(Color.BLACK); visibility = View.GONE }
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
+        coverName = TextView(this).apply { textSize = 34f; setTextColor(Color.WHITE); typeface = Typeface.DEFAULT_BOLD; gravity = Gravity.CENTER }
+        coverNum = TextView(this).apply {
+            textSize = 110f; setTextColor(BLUE); typeface = Typeface.DEFAULT_BOLD; gravity = Gravity.CENTER
+            setPadding(0, dp(12), 0, dp(12))
+        }
+        val coverSub = TextView(this).apply { text = "Đang tải kênh…"; textSize = 20f; setTextColor(0xFFAAAAAA.toInt()); gravity = Gravity.CENTER }
+        box.addView(coverName); box.addView(coverNum); box.addView(coverSub)
+        cover.addView(box, FrameLayout.LayoutParams(-2, -2, Gravity.CENTER))
+        root.addView(cover, FrameLayout.LayoutParams(-1, -1))
 
         // ---- bảng chọn kênh: trái = đài, phải = kênh ----
         overlay = LinearLayout(this).apply {
@@ -415,12 +432,39 @@ class MainActivity : Activity() {
         getSharedPreferences("tv", MODE_PRIVATE).edit().putString("last", c.url).apply()
         hideOverlay(false)
         web.onResume()
-        showOsd(c.label())
+        showCover(c.label())
         startWatch()
         load(c.url)
     }
 
     // Lướt kênh: chỉ cập nhật tên kênh ngay, trang chỉ tải sau 0,6 giây không bấm nữa (đỡ giật trên máy yếu)
+    private val tick = object : Runnable {
+        override fun run() {
+            countdown--
+            if (countdown <= 0) {
+                hideCover()
+                cur?.let { showOsd(it.label()) }
+            } else {
+                coverNum.text = countdown.toString()
+                ui.postDelayed(this, 1000)
+            }
+        }
+    }
+
+    private fun showCover(name: String) {
+        coverName.text = name
+        countdown = 5
+        coverNum.text = "5"
+        cover.visibility = View.VISIBLE
+        ui.removeCallbacks(tick)
+        ui.postDelayed(tick, 1000)
+    }
+
+    private fun hideCover() {
+        ui.removeCallbacks(tick)
+        cover.visibility = View.GONE
+    }
+
     private val zapRun = Runnable { pending?.let { play(it) } }
 
     private fun preview(c: Ch) {
@@ -490,6 +534,7 @@ class MainActivity : Activity() {
     /** Mở bảng chọn. focusGroups = true: con trỏ ở cột Đài; mặc định nhảy tới đúng kênh đang xem. */
     private fun showOverlay(focusGroups: Boolean) {
         ui.removeCallbacks(zapRun); pending = null
+        hideCover()
         val c = cur
         val gi = if (c == null) 0 else groupNames.indexOf(c.group).coerceAtLeast(0)
         setGroup(gi)
