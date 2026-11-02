@@ -68,6 +68,7 @@ private const val TV_FULL_JS = """
     (document.head || document.documentElement).appendChild(st);
   }
   function go(){
+    if (window.__tvPaused) return;
     var v = document.querySelector('video');
     if (v) { try { v.muted = false; var p = v.play(); if (p && p.catch) p.catch(function(){}); } catch(e){} }
   }
@@ -83,6 +84,12 @@ private const val TV_FULL_JS = """
 
 /** Chạy lại TV_FULL_JS rồi trả về true nếu video đang thật sự chạy. */
 private const val CHECK_JS = TV_FULL_JS + """;(function(){var v=document.querySelector('video');return !!(v&&!v.paused&&v.readyState>2&&v.currentTime>0);})()"""
+
+/** Tắt tiếng + dừng video ngay (khi về bảng chọn kênh). */
+private const val PAUSE_JS = """window.__tvPaused=true;Array.prototype.forEach.call(document.querySelectorAll('video,audio'),function(v){try{v.muted=true;v.pause();}catch(e){}});"""
+
+/** Cho phép phát lại (khi quay lại xem đúng kênh cũ). */
+private const val RESUME_JS = """window.__tvPaused=false;"""
 
 private const val GOLD = 0xFFFFD27A.toInt()
 private const val GREEN = 0xFF7CFC9A.toInt()
@@ -400,7 +407,8 @@ class MainActivity : Activity() {
         pending = null
         cur = c
         getSharedPreferences("tv", MODE_PRIVATE).edit().putString("last", c.url).apply()
-        hideOverlay()
+        hideOverlay(false)
+        web.onResume()
         showOsd(c.label())
         startWatch()
         load(c.url)
@@ -434,6 +442,7 @@ class MainActivity : Activity() {
     private val watch = object : Runnable {
         override fun run() {
             if (cur == null || isFinishing || stopped) return
+            if (overlayOn()) { ui.postDelayed(this, 10000); return }
             web.evaluateJavascript(CHECK_JS) { r ->
                 if (r == "true") {
                     stuck = 0
@@ -472,14 +481,28 @@ class MainActivity : Activity() {
         val gi = if (c == null) 0 else groupNames.indexOf(c.group).coerceAtLeast(0)
         setGroup(gi)
         overlay.visibility = View.VISIBLE
+        if (c != null) silence()
         groupList.setSelection(leftSel)
         chList.setSelection(if (c != null) shownList.indexOf(c).coerceAtLeast(0) else 0)
         if (focusGroups) groupList.requestFocus() else chList.requestFocus()
     }
 
-    private fun hideOverlay() {
+    /** Về bảng chọn kênh là tắt tiếng ngay. */
+    private fun silence() {
+        web.evaluateJavascript(PAUSE_JS, null)
+        web.onPause()
+    }
+
+    /** resume = true: quay lại xem đúng kênh cũ (bật tiếng lại). play() gọi với false vì sắp tải kênh mới. */
+    private fun hideOverlay(resume: Boolean = true) {
+        val wasOn = overlayOn()
         overlay.visibility = View.GONE
         root.requestFocus()
+        if (wasOn && resume && cur != null) {
+            web.onResume()
+            web.evaluateJavascript(RESUME_JS, null)
+            web.evaluateJavascript(TV_FULL_JS, null)
+        }
     }
 
     // ---------------------------------------------------------------- OSD
