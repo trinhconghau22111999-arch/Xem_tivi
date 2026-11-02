@@ -145,7 +145,11 @@ class MainActivity : Activity() {
         val last = getSharedPreferences("tv", MODE_PRIVATE).getString("last", null)
         val start = all.firstOrNull { it.url == last }
         if (start != null) ui.postDelayed({ if (!isFinishing) play(start) }, 300)
-        else { showOverlay(true); showWelcome() }
+        else {
+            // Chưa có kênh nào đã xem: nhớ lại đài đã chọn lần trước; chỉ lần đầu tiên thật sự mới hiện "Tivi của Bắp"
+            val g = groupNames.indexOf(getSharedPreferences("tv", MODE_PRIVATE).getString("lastGroup", null))
+            if (g >= 0) showOverlay(true, g) else { showOverlay(true); showWelcome() }
+        }
     }
 
     override fun onStart() {
@@ -313,7 +317,7 @@ class MainActivity : Activity() {
 
         groupList.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position != leftSel) setGroup(position)
+                if (position != leftSel) { setGroup(position); saveGroup() }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -324,6 +328,7 @@ class MainActivity : Activity() {
                 play(l[0])
             } else {
                 setGroup(pos)               // luôn hiện đúng các kênh của đài vừa bấm
+                saveGroup()
                 chList.setSelection(0)
                 chList.requestFocus()
             }
@@ -435,7 +440,7 @@ class MainActivity : Activity() {
         ui.removeCallbacks(zapRun); ui.removeCallbacks(retryRun)
         pending = null
         cur = c
-        getSharedPreferences("tv", MODE_PRIVATE).edit().putString("last", c.url).apply()
+        getSharedPreferences("tv", MODE_PRIVATE).edit().putString("last", c.url).putString("lastGroup", c.group).commit()
         hideOverlay(false)
         web.onResume()
         showCover(c.label())
@@ -543,15 +548,21 @@ class MainActivity : Activity() {
     /** Đồng bộ cột Kênh với đài đang được tô sáng ở cột Đài (không chỉ dựa vào onItemSelected). */
     private fun syncGroup() {
         val p = groupList.selectedItemPosition
-        if (p >= 0 && p != leftSel) setGroup(p)
+        if (p >= 0 && p != leftSel) { setGroup(p); saveGroup() }
+    }
+
+    /** Nhớ đài đang chọn (ghi ngay xuống bộ nhớ, thoát hẳn app vẫn còn). */
+    private fun saveGroup() {
+        if (leftSel in groupNames.indices)
+            getSharedPreferences("tv", MODE_PRIVATE).edit().putString("lastGroup", groupNames[leftSel]).commit()
     }
 
     /** Mở bảng chọn. focusGroups = true: con trỏ ở cột Đài; mặc định nhảy tới đúng kênh đang xem. */
-    private fun showOverlay(focusGroups: Boolean) {
+    private fun showOverlay(focusGroups: Boolean, startGroup: Int? = null) {
         ui.removeCallbacks(zapRun); pending = null
         hideCover()
         val c = cur
-        val gi = if (c == null) 0 else groupNames.indexOf(c.group).coerceAtLeast(0)
+        val gi = startGroup ?: (if (c == null) 0 else groupNames.indexOf(c.group).coerceAtLeast(0))
         setGroup(gi)
         overlay.visibility = View.VISIBLE
         if (c != null) silence()
