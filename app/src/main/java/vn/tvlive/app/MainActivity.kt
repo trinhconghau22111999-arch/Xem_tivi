@@ -95,7 +95,6 @@ class MainActivity : Activity() {
     private val all = ArrayList<Ch>()                 // tất cả kênh, đánh số 1..N theo thứ tự trong channels.json
     private val groupNames = ArrayList<String>()
     private val groupChs = ArrayList<List<Ch>>()
-    private val favs = LinkedHashSet<String>()        // url các kênh yêu thích
     private var cur: Ch? = null                       // kênh đang xem
     private var pending: Ch? = null                   // kênh đang "lướt" tới, chưa tải
     private var shownList: List<Ch> = emptyList()     // danh sách kênh đang hiện bên phải
@@ -119,7 +118,6 @@ class MainActivity : Activity() {
 
     private var stuck = 0
     private var stopped = false
-    private var longDone = false
     private var lastBack = 0L
     private val numBuf = StringBuilder()
 
@@ -131,7 +129,6 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         loadChannels()
-        loadPrefs()
         buildUi()
         hideSystemBars()
         val last = getSharedPreferences("tv", MODE_PRIVATE).getString("last", null)
@@ -198,15 +195,6 @@ class MainActivity : Activity() {
                 if (list.isNotEmpty()) { groupNames.add(gname); groupChs.add(list) }
             }
         } catch (e: Exception) { }
-    }
-
-    private fun loadPrefs() {
-        val sp = getSharedPreferences("tv", MODE_PRIVATE)
-        favs.addAll(sp.getStringSet("favs", emptySet()) ?: emptySet())
-    }
-
-    private fun saveFavs() {
-        getSharedPreferences("tv", MODE_PRIVATE).edit().putStringSet("favs", HashSet(favs)).apply()
     }
 
     private fun listFor(gi: Int): List<Ch> = groupChs[gi]
@@ -280,13 +268,13 @@ class MainActivity : Activity() {
         chList.nextFocusLeftId = groupList.id
 
         leftAd = RowAdapter({ groupNames.size }) { t, p ->
-            t.text = (if (groupChs[p].any { it.url in favs }) "★ " else "") + groupNames[p]
+            t.text = groupNames[p]
             t.setTextColor(if (p == leftSel) GOLD else Color.WHITE)
             t.typeface = if (p == leftSel) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
         }
         rightAd = RowAdapter({ shownList.size }) { t, p ->
             val c = shownList[p]
-            t.text = (if (c.url in favs) "★ " else "") + c.label()
+            t.text = c.label()
             t.setTextColor(if (c == cur) GREEN else Color.WHITE)
             t.typeface = if (c == cur) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
         }
@@ -310,14 +298,9 @@ class MainActivity : Activity() {
         left.addView(title("ĐÀI"))
         left.addView(groupList, LinearLayout.LayoutParams(-1, 0, 1f))
         rightTitle = title("")
-        val hint = TextView(this).apply {
-            text = "Giữ OK / nút Đỏ: ★ yêu thích   •   Back: đóng"
-            textSize = 16f; setTextColor(0xFFAAAAAA.toInt()); setPadding(dp(16), dp(10), 0, 0)
-        }
         val right = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(28), 0, 0, 0) }
         right.addView(rightTitle)
         right.addView(chList, LinearLayout.LayoutParams(-1, 0, 1f))
-        right.addView(hint)
         overlay.addView(left, LinearLayout.LayoutParams(0, -1, 3f))
         overlay.addView(right, LinearLayout.LayoutParams(0, -1, 7f))
         root.addView(overlay, FrameLayout.LayoutParams(-1, -1))
@@ -499,17 +482,6 @@ class MainActivity : Activity() {
         root.requestFocus()
     }
 
-    private fun toggleFav(c: Ch) {
-        val added = favs.add(c.url)
-        if (!added) favs.remove(c.url)
-        saveFavs()
-        val pos = chList.selectedItemPosition
-        val keepGroup = leftSel
-        setGroup(keepGroup)
-        if (overlayOn() && pos >= 0) chList.setSelection(pos.coerceAtMost((shownList.size - 1).coerceAtLeast(0)))
-        Toast.makeText(this, (if (added) "★ Đã thêm: " else "Đã bỏ khỏi yêu thích: ") + c.name, Toast.LENGTH_SHORT).show()
-    }
-
     // ---------------------------------------------------------------- OSD
 
     private val hideOsd = Runnable { osd.visibility = View.GONE; osdTime.visibility = View.GONE }
@@ -561,23 +533,6 @@ class MainActivity : Activity() {
         if (k == KeyEvent.KEYCODE_BACK) return super.dispatchKeyEvent(e)
 
         if (overlayOn()) {
-            // Giữ OK trên một kênh = thêm/bỏ yêu thích
-            if ((k == KeyEvent.KEYCODE_DPAD_CENTER || k == KeyEvent.KEYCODE_ENTER) && chList.hasFocus()) {
-                if (down && e.repeatCount == 1) {
-                    shownList.getOrNull(chList.selectedItemPosition)?.let { toggleFav(it) }
-                    longDone = true
-                    return true
-                }
-                if (down && e.repeatCount > 1) return true
-                if (!down && longDone) { longDone = false; return true }
-                if (down) longDone = false
-            }
-            if (k == KeyEvent.KEYCODE_PROG_RED) {
-                if (down && e.repeatCount == 0) {
-                    if (chList.hasFocus()) shownList.getOrNull(chList.selectedItemPosition)?.let { toggleFav(it) }
-                }
-                return true
-            }
             if (k == KeyEvent.KEYCODE_MENU || k == KeyEvent.KEYCODE_INFO || k == KeyEvent.KEYCODE_GUIDE) {
                 if (down && cur != null) hideOverlay()
                 return true
@@ -596,7 +551,7 @@ class MainActivity : Activity() {
             KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_PAGE_DOWN,
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER,
             KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_GUIDE, KeyEvent.KEYCODE_TV,
-            KeyEvent.KEYCODE_PROG_RED, KeyEvent.KEYCODE_PROG_YELLOW, KeyEvent.KEYCODE_PROG_BLUE -> true
+            KeyEvent.KEYCODE_PROG_YELLOW, KeyEvent.KEYCODE_PROG_BLUE -> true
             else -> false
         }
         if (!mapped) return super.dispatchKeyEvent(e)     // phím âm lượng, v.v. để hệ thống xử lý
@@ -610,7 +565,6 @@ class MainActivity : Activity() {
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER,
             KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_GUIDE, KeyEvent.KEYCODE_TV -> if (e.repeatCount == 0) showOverlay(false)
             KeyEvent.KEYCODE_INFO -> cur?.let { showOsd(it.label() + "   •   " + it.group) }
-            KeyEvent.KEYCODE_PROG_RED -> if (e.repeatCount == 0) (pending ?: cur)?.let { toggleFav(it) }
             KeyEvent.KEYCODE_PROG_YELLOW -> if (e.repeatCount == 0) { showMsg("Tải lại kênh…", 3000); reloadCur() }
             KeyEvent.KEYCODE_PROG_BLUE -> if (e.repeatCount == 0) showOverlay(false)
         }
