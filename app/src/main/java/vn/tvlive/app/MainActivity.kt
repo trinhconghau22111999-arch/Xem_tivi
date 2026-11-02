@@ -152,7 +152,7 @@ class MainActivity : Activity() {
         if (stopped) {
             stopped = false
             web.onResume()
-            cur?.let { startWatch(); load(it.url) }
+            if (!overlayOn()) cur?.let { startWatch(); load(it.url) }
         }
     }
 
@@ -580,8 +580,13 @@ class MainActivity : Activity() {
         root.requestFocus()
         if (wasOn && resume && cur != null) {
             web.onResume()
-            web.evaluateJavascript(RESUME_JS, null)
-            web.evaluateJavascript(TV_FULL_JS, null)
+            val u = web.url
+            if (u == null || u.startsWith("about:")) {
+                startWatch(); reloadCur()
+            } else {
+                web.evaluateJavascript(RESUME_JS, null)
+                web.evaluateJavascript(TV_FULL_JS, null)
+            }
         }
     }
 
@@ -684,15 +689,12 @@ class MainActivity : Activity() {
         return true
     }
 
-    // Back: đang xem -> về bảng chọn kênh (cột Đài). Trong bảng: Back đóng bảng, bấm 2 lần nhanh (dưới 1,5 giây) thì thoát app.
+    // Back: đang xem -> về bảng chọn kênh. Đang ở bảng chọn kênh -> thoát ra như bấm Home (app vẫn còn trong đa nhiệm).
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        val now = System.currentTimeMillis()
-        val quick = now - lastBack < 1500
-        lastBack = now
         when {
             fullView != null -> hideFull()
-            overlayOn() -> if (cur == null || quick) finish() else hideOverlay()
+            overlayOn() -> moveTaskToBack(true)
             else -> showOverlay(true)
         }
     }
