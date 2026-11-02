@@ -257,6 +257,10 @@ class MainActivity : Activity() {
         setupWeb()
         root.addView(web, FrameLayout.LayoutParams(-1, -1))
 
+        // Điện thoại: chạm vào màn hình đang xem là mở bảng chọn kênh (lớp trong suốt phủ lên WebView)
+        val tapLayer = View(this).apply { setOnClickListener { if (!overlayOn()) showOverlay(false) } }
+        root.addView(tapLayer, FrameLayout.LayoutParams(-1, -1))
+
         fullLayer = FrameLayout(this).apply { visibility = View.GONE; setBackgroundColor(Color.BLACK) }
         root.addView(fullLayer, FrameLayout.LayoutParams(-1, -1))
 
