@@ -1,0 +1,354 @@
+{
+ "groups": [
+  {
+   "name": "Vĩnh Long",
+   "channels": [
+    {
+     "name": "Vĩnh Long",
+     "url": "https://vtvgo.vn/channel/10009"
+    }
+   ]
+  },
+  {
+   "name": "Cà Mau",
+   "channels": [
+    {
+     "name": "Truyền hình Cà Mau",
+     "url": "https://vtvgo.vn/channel/218"
+    }
+   ]
+  },
+  {
+   "name": "HTV9",
+   "channels": [
+    {
+     "name": "HTV9",
+     "url": "https://vtvgo.vn/channel/10068"
+    }
+   ]
+  },
+  {
+   "name": "Đồng Tháp",
+   "channels": [
+    {
+     "name": "Truyền hình Đồng Tháp",
+     "url": "https://vtvgo.vn/channel/133"
+    }
+   ]
+  },
+  {
+   "name": "Việt Nam",
+   "channels": [
+    {
+     "name": "VTV1",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv1-1.html"
+    },
+    {
+     "name": "VTV2",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv2-2.html"
+    },
+    {
+     "name": "VTV3",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv3-3.html"
+    },
+    {
+     "name": "VTV4",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv4-4.html"
+    },
+    {
+     "name": "VTV5",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv5-5.html"
+    },
+    {
+     "name": "VTV6",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv6-6.html"
+    },
+    {
+     "name": "VTV7",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv7-27.html"
+    },
+    {
+     "name": "VTV8",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv8-36.html"
+    },
+    {
+     "name": "VTV9",
+     "url": "https://vtvgo.vn/xem-truc-tuyen-kenh-vtv9-39.html"
+    }
+   ]
+  },
+  {
+   "name": "An Giang",
+   "channels": [
+    {
+     "name": "Truyền hình An Giang",
+     "url": "https://vtvgo.vn/channel/231"
+    }
+   ]
+  },
+  {
+   "name": "Bắc Ninh",
+   "channels": [
+    {
+     "name": "Truyền hình Bắc Ninh",
+     "url": "https://vtvgo.vn/channel/219"
+    }
+   ]
+  },
+  {
+   "name": "Cần Thơ",
+   "channels": [
+    {
+     "name": "Truyền hình Cần Thơ 1",
+     "url": "https://vtvgo.vn/channel/243"
+    }
+   ]
+  },
+  {
+   "name": "Cao Bằng",
+   "channels": [
+    {
+     "name": "Truyền hình Cao Bằng",
+     "url": "https://vtvgo.vn/channel/555"
+    }
+   ]
+  },
+  {
+   "name": "Đà Nẵng",
+   "channels": [
+    {
+     "name": "Truyền hình Đà Nẵng",
+     "url": "https://vtvgo.vn/channel/175"
+    }
+   ]
+  },
+  {
+   "name": "Đắk Lắk",
+   "channels": [
+    {
+     "name": "Truyền hình Đắk Lắk",
+     "url": "https://vtvgo.vn/channel/221"
+    }
+   ]
+  },
+  {
+   "name": "Điện Biên",
+   "channels": [
+    {
+     "name": "Truyền hình Điện Biên",
+     "url": "https://vtvgo.vn/channel/230"
+    }
+   ]
+  },
+  {
+   "name": "Đồng Nai",
+   "channels": [
+    {
+     "name": "Truyền hình Đồng Nai",
+     "url": "https://vtvgo.vn/channel/234"
+    }
+   ]
+  },
+  {
+   "name": "Gia Lai",
+   "channels": [
+    {
+     "name": "Truyền hình Gia Lai",
+     "url": "https://vtvgo.vn/channel/223"
+    }
+   ]
+  },
+  {
+   "name": "Hà Nội",
+   "channels": [
+    {
+     "name": "Hà Nội 1",
+     "url": "https://vtvgo.vn/channel/111"
+    },
+    {
+     "name": "Hà Nội 2",
+     "url": "https://vtvgo.vn/channel/17"
+    }
+   ]
+  },
+  {
+   "name": "Hà Tĩnh",
+   "channels": [
+    {
+     "name": "Truyền hình Hà Tĩnh",
+     "url": "https://vtvgo.vn/channel/333"
+    }
+   ]
+  },
+  {
+   "name": "Hải Phòng",
+   "channels": [
+    {
+     "name": "Truyền hình Hải Phòng",
+     "url": "https://vtvgo.vn/channel/444"
+    }
+   ]
+  },
+  {
+   "name": "Huế",
+   "channels": [
+    {
+     "name": "Truyền hình Huế",
+     "url": "https://vtvgo.vn/channel/127"
+    }
+   ]
+  },
+  {
+   "name": "Khánh Hòa",
+   "channels": [
+    {
+     "name": "Truyền hình Khánh Hòa",
+     "url": "https://vtvgo.vn/channel/125"
+    }
+   ]
+  },
+  {
+   "name": "Lai Châu",
+   "channels": [
+    {
+     "name": "Truyền hình Lai Châu",
+     "url": "https://vtvgo.vn/channel/228"
+    }
+   ]
+  },
+  {
+   "name": "Lâm Đồng",
+   "channels": [
+    {
+     "name": "Truyền hình Lâm Đồng",
+     "url": "https://vtvgo.vn/channel/224"
+    }
+   ]
+  },
+  {
+   "name": "Lạng Sơn",
+   "channels": [
+    {
+     "name": "Truyền hình Lạng Sơn",
+     "url": "https://vtvgo.vn/channel/321"
+    }
+   ]
+  },
+  {
+   "name": "Lào Cai",
+   "channels": [
+    {
+     "name": "Truyền hình Lào Cai",
+     "url": "https://vtvgo.vn/channel/247"
+    }
+   ]
+  },
+  {
+   "name": "Nghệ An",
+   "channels": [
+    {
+     "name": "Truyền hình Nghệ An",
+     "url": "https://vtvgo.vn/channel/121"
+    }
+   ]
+  },
+  {
+   "name": "Ninh Bình",
+   "channels": [
+    {
+     "name": "Truyền hình Ninh Bình",
+     "url": "https://vtvgo.vn/channel/183"
+    }
+   ]
+  },
+  {
+   "name": "Phú Thọ",
+   "channels": [
+    {
+     "name": "Truyền hình Phú Thọ",
+     "url": "https://vtvgo.vn/channel/229"
+    }
+   ]
+  },
+  {
+   "name": "Quân đội - An ninh",
+   "channels": [
+    {
+     "name": "ANTV",
+     "url": "https://vtvgo.vn/channel/89"
+    },
+    {
+     "name": "QPVN",
+     "url": "https://vtvgo.vn/channel/103"
+    }
+   ]
+  },
+  {
+   "name": "Quảng Ngãi",
+   "channels": [
+    {
+     "name": "Truyền hình Quảng Ngãi",
+     "url": "https://vtvgo.vn/channel/145_nb"
+    }
+   ]
+  },
+  {
+   "name": "Quảng Ninh",
+   "channels": [
+    {
+     "name": "Quảng Ninh 1",
+     "url": "https://vtvgo.vn/channel/119"
+    },
+    {
+     "name": "Quảng Ninh 3",
+     "url": "https://vtvgo.vn/channel/120"
+    }
+   ]
+  },
+  {
+   "name": "Quảng Trị",
+   "channels": [
+    {
+     "name": "Truyền hình Quảng Trị",
+     "url": "https://vtvgo.vn/channel/236"
+    }
+   ]
+  },
+  {
+   "name": "Sơn La",
+   "channels": [
+    {
+     "name": "Truyền hình Sơn La",
+     "url": "https://vtvgo.vn/channel/254"
+    }
+   ]
+  },
+  {
+   "name": "Tây Ninh",
+   "channels": [
+    {
+     "name": "Truyền hình Tây Ninh",
+     "url": "https://vtvgo.vn/channel/255"
+    }
+   ]
+  },
+  {
+   "name": "Thái Nguyên",
+   "channels": [
+    {
+     "name": "Truyền hình Thái Nguyên",
+     "url": "https://vtvgo.vn/channel/238"
+    }
+   ]
+  },
+  {
+   "name": "Tuyên Quang",
+   "channels": [
+    {
+     "name": "Truyền hình Tuyên Quang",
+     "url": "https://vtvgo.vn/channel/235"
+    }
+   ]
+  }
+ ]
+}
