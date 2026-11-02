@@ -86,7 +86,7 @@ private const val CHECK_JS = TV_FULL_JS + """;(function(){var v=document.querySe
 
 private const val GOLD = 0xFFFFD27A.toInt()
 private const val GREEN = 0xFF7CFC9A.toInt()
-private const val BLUE = 0xFF3A7BFF.toInt()
+private const val BLUE = 0xFF1E90FF.toInt()   // xanh dương sáng cho viền chọn
 
 class MainActivity : Activity() {
     private val ui = Handler(Looper.getMainLooper())
@@ -217,7 +217,7 @@ class MainActivity : Activity() {
         id = View.generateViewId()
         divider = null
         dividerHeight = dp(4)
-        setSelector(GradientDrawable().apply { setColor(BLUE); cornerRadius = dp(8).toFloat() })
+        setSelector(GradientDrawable().apply { setColor(Color.BLACK); setStroke(dp(4), BLUE); cornerRadius = dp(10).toFloat() })
         isVerticalScrollBarEnabled = false
         overScrollMode = View.OVER_SCROLL_NEVER
     }
@@ -259,7 +259,7 @@ class MainActivity : Activity() {
         // ---- bảng chọn kênh: trái = đài, phải = kênh ----
         overlay = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(0xF00E0E16.toInt())
+            setBackgroundColor(Color.BLACK)
             setPadding(dp(40), dp(28), dp(40), dp(16))
             visibility = View.GONE
         }
