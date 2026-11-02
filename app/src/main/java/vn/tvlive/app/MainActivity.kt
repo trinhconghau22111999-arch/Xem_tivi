@@ -684,8 +684,7 @@ class MainActivity : Activity() {
         return true
     }
 
-    // Back (kể cả cử chỉ vuốt từ mép màn hình): đang xem thì bỏ qua, không văng khỏi kênh.
-    // Trong bảng chọn kênh: Back đóng bảng; bấm 2 lần nhanh (dưới 1,5 giây) thì thoát app.
+    // Back: đang xem -> về bảng chọn kênh (cột Đài). Trong bảng: Back đóng bảng, bấm 2 lần nhanh (dưới 1,5 giây) thì thoát app.
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val now = System.currentTimeMillis()
@@ -694,7 +693,7 @@ class MainActivity : Activity() {
         when {
             fullView != null -> hideFull()
             overlayOn() -> if (cur == null || quick) finish() else hideOverlay()
-            else -> { /* đang xem: không làm gì */ }
+            else -> showOverlay(true)
         }
     }
 }
